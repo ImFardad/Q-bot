@@ -11,7 +11,7 @@ if (apiKey) {
     const generationConfig = { temperature: 0.9 };
     model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig });
   } catch (error) {
-    console.error("Could not initialize Gemini AI. Please check your API key.", error);
+    console.error('Could not initialize Gemini AI. Please check your API key.', error);
     model = null;
   }
 } else {
@@ -43,7 +43,7 @@ Now, generate a new, unique question with a short answer.`;
     const text = response.text();
     return text.trim();
   } catch (error) {
-    console.error("Error generating question from Gemini:", error);
+    console.error('Error generating question from Gemini:', error);
     return null;
   }
 }
@@ -70,7 +70,7 @@ Is the user's answer correct?`;
     return '0';
 
   } catch (error) {
-    console.error("Error evaluating answer with Gemini:", error);
+    console.error('Error evaluating answer with Gemini:', error);
     return null;
   }
 }
