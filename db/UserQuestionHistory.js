@@ -12,6 +12,11 @@ const UserQuestionHistory = sequelize.define('UserQuestionHistory', {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'general',
+  },
 });
 
 // Define the association

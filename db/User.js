@@ -20,6 +20,11 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true, // username is optional
   },
+  score: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
 }, {
   // Model options
   timestamps: true, // Automatically add createdAt and updatedAt fields

@@ -1,7 +1,8 @@
 const { menus } = require('../keyboards/inlineKeyboards');
-const { startQuiz } = require('./quizHandler');
+const { startQuiz, startMathQuiz } = require('./quizHandler');
 const { handleStart } = require('./startHandler');
 const { adminId } = require('../config');
+const User = require('../db/User');
 const UserQuestionHistory = require('../db/UserQuestionHistory');
 const _ = require('lodash');
 
@@ -11,11 +12,11 @@ async function handleMenuCallback(bot, callbackQuery) {
   const user = callbackQuery.from;
   const messageId = callbackQuery.message.message_id;
 
-  // Answer the callback query immediately
-  bot.answerCallbackQuery(callbackQuery.id);
-
   // --- Navigation ---
   if (queryData.startsWith('navigate:')) {
+    // Answer the callback query immediately for navigation
+    bot.answerCallbackQuery(callbackQuery.id);
+
     const parts = queryData.split(':');
     const menuName = parts[1];
     const parentMenuName = parts.length > 2 ? parts[2] : null;
@@ -68,13 +69,35 @@ async function handleMenuCallback(bot, callbackQuery) {
   if (queryData.startsWith('action:')) {
     const actionName = queryData.split(':')[1];
     if (actionName === 'start_quiz') {
+      bot.answerCallbackQuery(callbackQuery.id);
       startQuiz(bot, chatId, user.id);
+    } else if (actionName === 'start_math_quiz') {
+      bot.answerCallbackQuery(callbackQuery.id);
+      startMathQuiz(bot, chatId, user.id);
+    } else if (actionName === 'show_score') {
+      try {
+        const userRecord = await User.findByPk(user.id);
+        const score = userRecord ? userRecord.score : 0;
+        bot.answerCallbackQuery(callbackQuery.id, {
+          text: `💰 امتیاز فعلی شما: ${score}`,
+          show_alert: true,
+        });
+      } catch (error) {
+        console.error('Failed to retrieve user score:', error);
+        bot.answerCallbackQuery(callbackQuery.id, {
+          text: 'خطایی در دریافت امتیاز رخ داد.',
+          show_alert: true,
+        });
+      }
     }
     return;
   }
 
   // --- Admin Actions ---
   if (queryData.startsWith('admin:')) {
+    // Answer the callback query immediately
+    bot.answerCallbackQuery(callbackQuery.id);
+
     if (user.id.toString() !== adminId) {
       bot.answerCallbackQuery(callbackQuery.id, { text: 'شما دسترسی به این بخش را ندارید.', show_alert: true });
       return;

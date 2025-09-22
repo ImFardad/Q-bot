@@ -5,10 +5,9 @@ const menus = {
     text: (name) => `سلام ${name}!\n\nبه ربات ما خوش آمدید. لطفاً یکی از گزینه‌های زیر را انتخاب کنید:`, 
     options: (userId) => {
       const keyboard = [
-        [{ text: 'گزینه اول', callback_data: 'navigate:option1:main' }],
-        [{ text: 'گزینه دوم', callback_data: 'navigate:option2:main' }],
-        [{ text: 'گزینه سوم', callback_data: 'navigate:option3:main' }],
-        [{ text: '🎲 حل سوال', callback_data: 'action:start_quiz' }],
+        [{ text: '🧠 سوال اطلاعات عمومی', callback_data: 'action:start_quiz' }],
+        [{ text: '🧮 حل معادله ریاضی', callback_data: 'action:start_math_quiz' }],
+        [{ text: '🏆 امتیاز من', callback_data: 'action:show_score' }],
       ];
 
       // Add admin panel button if the user is an admin
@@ -21,30 +20,6 @@ const menus = {
           inline_keyboard: keyboard,
         },
       };
-    },
-  },
-  option1: {
-    text: 'شما در منوی "گزینه اول" هستید. این یک متن آزمایشی است.',
-    options: {
-      reply_markup: {
-        inline_keyboard: [], // Back button will be added dynamically
-      },
-    },
-  },
-  option2: {
-    text: 'اینجا صفحه مربوط به "گزینه دوم" است.',
-    options: {
-      reply_markup: {
-        inline_keyboard: [], // Back button will be added dynamically
-      },
-    },
-  },
-  option3: {
-    text: 'شما "گزینه سوم" را انتخاب کرده‌اید. محتوای این صفحه می‌تواند متفاوت باشد.',
-    options: {
-      reply_markup: {
-        inline_keyboard: [], // Back button will be added dynamically
-      },
     },
   },
   admin: {
