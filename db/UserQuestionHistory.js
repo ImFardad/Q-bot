@@ -8,6 +8,14 @@ const UserQuestionHistory = sequelize.define('UserQuestionHistory', {
     autoIncrement: true,
     primaryKey: true,
   },
+  userId: {
+    type: DataTypes.BIGINT,
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id',
+    },
+  },
   question: {
     type: DataTypes.TEXT,
     allowNull: false,
