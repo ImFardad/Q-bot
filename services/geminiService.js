@@ -1,4 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { Op } = require('sequelize');
+const UserQuestionHistory = require('../db/UserQuestionHistory');
 require('dotenv').config();
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -18,32 +20,50 @@ if (apiKey) {
   console.warn('GEMINI_API_KEY is not set in .env file. Quiz feature will be disabled.');
 }
 
-async function generateQuestion() {
+async function generateQuestion(userId) {
   if (!model) return null;
 
-  const prompt = `You are a question generation bot. Your only job is to provide a single, interesting, and DIVERSE general knowledge question in Persian.
+  try {
+    // 1. Clean up old questions for the user
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    await UserQuestionHistory.destroy({
+      where: {
+        userId: userId,
+        createdAt: {
+          [Op.lt]: twentyFourHoursAgo,
+        },
+      },
+    });
+
+    // 2. Fetch recent questions for the user
+    const recentQuestions = await UserQuestionHistory.findAll({
+      where: { userId: userId },
+      order: [['createdAt', 'DESC']],
+      limit: 20,
+      attributes: ['question'],
+    });
+    const recentQuestionList = recentQuestions.map(item => `- ${item.question}`).join('\n');
+
+    // 3. Create the dynamic prompt
+    const prompt = `You are a question generation bot. Your only job is to provide a single, interesting, and DIVERSE general knowledge question in Persian.
 
 Follow these rules STRICTLY:
-1. The answer to the question MUST be short, ideally one to three words (e.g., a specific name, place, year, or term).
+1. The answer to the question MUST be short, ideally one to three words.
 2. Your response MUST contain ONLY the question text itself.
-3. Do NOT repeat questions. Ask from a wide range of categories (science, history, geography, art).
-4. Do NOT include any introductory text, the answer, or any hints.
+3. Do NOT include any introductory text, the answer, or any hints.
+4. Most importantly, DO NOT ask any of the following questions that have been asked recently:
+${recentQuestionList.length > 0 ? recentQuestionList : '(No recent questions)'}
 
-GOOD question example (short answer):
-"بلندترین قله جهان چه نام دارد?"
+Now, generate a new, unique question with a short answer that is NOT in the list above.`;
 
-BAD question example (long answer):
-"قانون دوم نیوتن را توضیح دهید."
-
-Now, generate a new, unique question with a short answer.`;
-
-  try {
+    // 4. Generate content
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
     return text.trim();
+
   } catch (error) {
-    console.error('Error generating question from Gemini:', error);
+    console.error('Error in generateQuestion function:', error);
     return null;
   }
 }

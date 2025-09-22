@@ -5,6 +5,7 @@ const { handleMenuCallback } = require('./handlers/menuHandler');
 const { handleQuizAnswer } = require('./handlers/quizHandler');
 const sequelize = require('./db/database');
 require('./db/User'); // Import model to ensure it's registered
+require('./db/UserQuestionHistory'); // Import model to ensure it's registered
 
 async function startBot() {
   if (!token) {

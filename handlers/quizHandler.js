@@ -1,9 +1,10 @@
 const geminiService = require('../services/geminiService');
+const UserQuestionHistory = require('../db/UserQuestionHistory');
 
 // Simple in-memory state for the quiz
 const userQuizState = {};
 
-async function startQuiz(bot, chatId) {
+async function startQuiz(bot, chatId, userId) {
   if (!geminiService.isEnabled) {
     bot.sendMessage(chatId, 'متاسفانه سرویس سوال در حال حاضر غیرفعال است. لطفاً بعداً تلاش کنید.');
     return;
@@ -11,11 +12,23 @@ async function startQuiz(bot, chatId) {
 
   bot.sendMessage(chatId, '⏳ در حال تولید یک سوال جدید...');
 
-  const question = await geminiService.generateQuestion();
+  const question = await geminiService.generateQuestion(userId);
 
   if (question) {
-    // Store only the question in the user's state
+    // Store the question in the user's state
     userQuizState[chatId] = { question: question };
+    
+    // Save the question to the history
+    try {
+      await UserQuestionHistory.create({
+        question: question,
+        userId: userId,
+      });
+    } catch (error) {
+      console.error('Failed to save question to history:', error);
+      // We can still proceed with the quiz even if saving fails
+    }
+
     bot.sendMessage(chatId, `سوال شما:\n\n🤔 **${question}**\n\nپاسخ خود را ارسال کنید.`, { parse_mode: 'Markdown' });
   } else {
     bot.sendMessage(chatId, 'خطایی در تولید سوال رخ داد. لطفاً دوباره تلاش کنید.');

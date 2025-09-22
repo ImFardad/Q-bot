@@ -42,7 +42,7 @@ async function handleStart(bot, msg) {
   const mainMenu = menus.main;
   const welcomeText = mainMenu.text(user.first_name);
 
-  bot.sendMessage(chatId, welcomeText, mainMenu.options);
+  bot.sendMessage(chatId, welcomeText, mainMenu.options(user.id));
 }
 
 module.exports = { handleStart };
